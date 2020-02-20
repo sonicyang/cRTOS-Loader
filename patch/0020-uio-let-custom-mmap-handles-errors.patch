@@ -1,0 +1,40 @@
+From e2160ce0e8f825506a6f3f90f9d2e04033d88a35 Mon Sep 17 00:00:00 2001
+From: Yang Chung Fan <sonicyang@softlab.cs.tsukuba.ac.jp>
+Date: Wed, 21 Nov 2018 18:21:53 +0900
+Subject: [PATCH 20/21] uio: let custom mmap handles errors
+
+---
+ drivers/uio/uio.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/uio/uio.c b/drivers/uio/uio.c
+index fba021f..b0c1ea4 100644
+--- a/drivers/uio/uio.c
++++ b/drivers/uio/uio.c
+@@ -682,6 +682,11 @@ static int uio_mmap(struct file *filep, struct vm_area_struct *vma)
+ 	unsigned long requested_pages, actual_pages;
+ 	int ret = 0;
+ 
++	if (idev->info->mmap) {
++		ret = idev->info->mmap(idev->info, vma);
++		return ret;
++	}
++
+ 	if (vma->vm_end < vma->vm_start)
+ 		return -EINVAL;
+ 
+@@ -697,11 +702,6 @@ static int uio_mmap(struct file *filep, struct vm_area_struct *vma)
+ 	if (requested_pages > actual_pages)
+ 		return -EINVAL;
+ 
+-	if (idev->info->mmap) {
+-		ret = idev->info->mmap(idev->info, vma);
+-		return ret;
+-	}
+-
+ 	switch (idev->info->mem[mi].memtype) {
+ 		case UIO_MEM_PHYS:
+ 			return uio_mmap_physical(vma);
+-- 
+2.7.4
+

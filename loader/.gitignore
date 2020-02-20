@@ -1,0 +1,8 @@
+tags
+
+src/*.o
+
+loader
+ping
+ping_shadow
+patched
